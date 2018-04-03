@@ -1,6 +1,7 @@
 import numpy as np
 import pandas
 from ggplot import *
+import sys
 
 """
 In this question, you need to:
@@ -158,4 +159,10 @@ def plot_cost_history(alpha, cost_history):
    return ggplot(cost_df, aes('Iteration', 'Cost_History')) + \
       geom_point() + ggtitle('Cost History for alpha = %.3f' % alpha )
 
-# predictions(weather_turnstile)
+file = "data/turnstile_weather_v2.csv"
+weather_turnstile = pandas.read_csv(file)
+print weather_turnstile.head(2)
+
+# sys.exit()
+
+predictions, plot = predictions(weather_turnstile)
