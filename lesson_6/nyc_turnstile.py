@@ -16,7 +16,7 @@ def normalize_features(df):
     """
     mu = df.mean()
     sigma = df.std()
-    
+
     if (sigma == 0).any():
         raise Exception("One or more features had the same value for all samples, and thus could " + \
                          "not be normalized. Please do not include features with only a single value " + \
@@ -37,8 +37,10 @@ def compute_cost(features, values, theta):
     # your code here
     predicted = np.dot(features,theta)
     sum_of_sq = np.square(predicted - values).sum()
-    cost =  1/(2*len(values)) * (sum_of_sq)
-
+    # print sum_of_sq
+    # print 1.0/(2.0*len(values))
+    cost =  1.0/(2.0*len(values)) * (sum_of_sq)
+    # print cost
     return cost
 
 def gradient_descent(features, values, theta, alpha, num_iterations):
@@ -63,7 +65,6 @@ def gradient_descent(features, values, theta, alpha, num_iterations):
     return theta, pandas.Series(cost_history)
 
 def predictions(dataframe):
-    # print dataframe.head(2)
     '''
     The NYC turnstile data is stored in a pandas dataframe called weather_turnstile.
     Using the information stored in the dataframe, let's predict the ridership of
@@ -96,14 +97,13 @@ def predictions(dataframe):
     that it runs faster.
     '''
     # Select Features (try different features!)
-    features = dataframe[['rain', 'precipi', 'Hour', 'meantempi']]
+    features = dataframe[['rain', 'precipi', 'hour', 'meantempi']]
     
     # Add UNIT to features using dummy variables
     dummy_units = pandas.get_dummies(dataframe['UNIT'], prefix='unit')
     features = features.join(dummy_units)
     
-    # print features.head(2)
-    
+
     # Values
     values = dataframe['ENTRIESn_hourly']
     m = len(values)
@@ -126,19 +126,23 @@ def predictions(dataframe):
                                                             theta_gradient_descent, 
                                                             alpha, 
                                                             num_iterations)
+    # print cost_history
     
     plot = None
     # -------------------------------------------------
     # Uncomment the next line to see your cost history
     # -------------------------------------------------
-    # plot = plot_cost_history(alpha, cost_history)
+    plot = plot_cost_history(alpha, cost_history)
     # 
     # Please note, there is a possibility that plotting
     # this in addition to your calculation will exceed 
     # the 30 second limit on the compute servers.
+
+
     
     predictions = np.dot(features_array, theta_gradient_descent)
-    return predictions, plot
+    r_sq = r_squared(values,predictions)
+    return predictions, plot, r_sq
 
 
 def plot_cost_history(alpha, cost_history):
@@ -159,10 +163,22 @@ def plot_cost_history(alpha, cost_history):
    return ggplot(cost_df, aes('Iteration', 'Cost_History')) + \
       geom_point() + ggtitle('Cost History for alpha = %.3f' % alpha )
 
+
+def r_squared(values, predicted):
+    avg_val = np.mean(values)
+    num = np.square(predicted-avg_val).sum()
+    den = np.square(values-avg_val).sum()
+    r_sq = num/den
+    return r_sq
+
 file = "data/turnstile_weather_v2.csv"
 weather_turnstile = pandas.read_csv(file)
-print weather_turnstile.head(2)
+print list(weather_turnstile)
 
-# sys.exit()
 
-predictions, plot = predictions(weather_turnstile)
+predictions, plot, r_sq = predictions(weather_turnstile)
+
+print r_sq
+
+print predictions
+print plot
